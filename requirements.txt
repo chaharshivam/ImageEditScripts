@@ -1,0 +1,9 @@
+# Core (images)
+Pillow>=9.1
+numpy>=1.21
+
+# Web app (webapp.py / Cleanroom.command)
+Flask>=2.2
+
+# Video features additionally need ffmpeg on PATH:  brew install ffmpeg
+# Optional watermark removal via ProPainter: see README (separate venv)

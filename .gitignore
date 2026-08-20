@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Python virtual environments
+.propainter-venv/
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# IDE
+.idea/
+.vscode/
+
+# Local AI/tool runtime data
+.propainter/
+
+# Environment/secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Logs/temp
+*.log
+tmp/
+temp/

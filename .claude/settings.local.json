@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/fake_standalone/realesrgan-ncnn-vulkan -i /dev/null -o /dev/null)",
+      "Bash(xargs -n1 basename)",
+      "Bash(python3 -m py_compile split_grids.py)",
+      "Bash(python3 split_grids.py /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/grids /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/z1 --format 45 --layout flat)",
+      "Bash(ffmpeg -version)",
+      "Bash(python3 -c \"import cv2; print\\('opencv', cv2.__version__\\)\")",
+      "Bash(python3 - /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad)",
+      "Bash(ffprobe -hide_banner -v error -show_entries format=duration,size -of csv=p=0 /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/vid/gemini_clip_c2pa.mp4)",
+      "Bash(python3 split_grids.py /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/vid /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/vout --format 916)",
+      "Bash(ffmpeg -hide_banner -h muxer=mp4)",
+      "Bash(ffmpeg -v error -i /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/vout/gemini_clip/video1.mp4 -f null -)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 split_grids.py /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/mixed /private/tmp/claude-501/-Users-shivamchahar-Documents-ImageEditScripts/73d4c4ad-b9c3-4672-bae1-3264ce2edc57/scratchpad/dryv --dry-run)"
+    ]
+  }
+}
