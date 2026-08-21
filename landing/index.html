@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Canonical: replace https://framewipe.com with FRAMEWIPE_SITE_URL after you buy the domain. -->
+<link rel="canonical" href="https://framewipe.com/">
+<title>Framewipe — prep frames locally. Nothing uploaded.</title>
+<meta name="description" content="Framewipe is a local Mac app that strips metadata, splits 2x2 grids, and cleans videos for Instagram. Nothing is uploaded.">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="stylesheet" href="styles.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Framewipe — prep frames locally. Nothing uploaded.">
+<meta property="og:description" content="Local Mac app for Instagram-ready frames. Metadata strip, 2x2 grid split, video clean. Nothing uploaded.">
+<meta property="og:image" content="https://framewipe.com/og.png">
+<meta property="og:url" content="https://framewipe.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Framewipe — prep frames locally. Nothing uploaded.">
+<meta name="twitter:description" content="Local Mac app for Instagram-ready frames. Nothing is uploaded.">
+<meta name="twitter:image" content="https://framewipe.com/og.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Framewipe",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "macOS",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Local Mac app that strips metadata, splits 2x2 grids, and cleans videos for Instagram. Nothing is uploaded.",
+  "url": "https://framewipe.com/"
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="mark.svg" width="36" height="36" alt="">
+    <strong>Framewipe</strong>
+  </header>
+
+  <h1>Prep frames locally.<br>Nothing uploaded.</h1>
+  <p class="lede">Framewipe is a Mac app that runs on your machine. Use it to strip metadata from AI images and videos, split 2x2 grids into Instagram 4:5 and 9:16 frames, and clean clips — without sending files anywhere.</p>
+
+  <p>
+    <a class="cta" href="#start">How to start</a>
+    <!-- PUBLIC_CODE_URL: change this one href if the public repo URL changes. Remove the link if unpublished. -->
+    <a class="cta sec" id="code-home" href="https://github.com/chaharshivam/ImageEditScripts">Source</a>
+  </p>
+
+  <h2>Who it is for</h2>
+  <p>Creators who generate stills and clips, then need them Instagram-ready without a cloud uploader, an account, or a paid API.</p>
+
+  <h2>What it does</h2>
+  <ul>
+    <li>Lossless metadata strip on JPEG, PNG, and WebP (pixels stay bit-identical).</li>
+    <li>Reads C2PA / Content Credentials and other origin declarations. It does not guess from pixels.</li>
+    <li>Splits 2x2 grids into 1080x1350 and 1080x1920 panels.</li>
+    <li>Cleans and scales video locally with ffmpeg.</li>
+    <li>Finds a burned-in watermark and either crops it out (safer) or paints it out.</li>
+  </ul>
+  <p>SynthID in the pixels is not removed. Framewipe will tell you if a file <em>declares</em> it.</p>
+
+  <h2 id="start">How to start</h2>
+  <ol>
+    <li>Clone the repo onto your Mac (or copy the folder).</li>
+    <li>Install ffmpeg: <code>brew install ffmpeg</code>.</li>
+    <li>Double-click <code>Framewipe.command</code>. The first run creates a local <code>.venv</code> and opens your browser at 127.0.0.1.</li>
+  </ol>
+  <pre><code>git clone YOUR_GIT_REMOTE
+cd ImageEditScripts
+chmod +x Framewipe.command
+open Framewipe.command</code></pre>
+  <p class="note">The processor always binds to 127.0.0.1. Do not put it on Fly, Render, or any public host — that would upload other people’s media to your server and cost money for ffmpeg.</p>
+
+  <h2>Cost</h2>
+  <p>The app and this landing page cost $0/month. A custom domain is optional, about $10/year after you buy it.</p>
+
+  <footer>
+    Framewipe is local software. Nothing here is a cloud service.
+  </footer>
+</div>
+</body>
+</html>

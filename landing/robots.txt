@@ -1,0 +1,5 @@
+# After you buy the domain, this file is served at the site root.
+User-agent: *
+Allow: /
+
+Sitemap: https://framewipe.com/sitemap.xml

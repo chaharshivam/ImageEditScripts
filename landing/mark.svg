@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Framewipe">
+  <title>Framewipe</title>
+  <style>
+    .ink { stroke: #121410; }
+    .wipe { stroke: #c4f542; }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #f4f1ea; }
+    }
+  </style>
+  <!-- 2x2 frame; bottom-right cell wiped to an open chartreuse stroke -->
+  <rect class="ink" x="3" y="3" width="11.5" height="11.5" rx="2.2" fill="none" stroke-width="2.2"/>
+  <rect class="ink" x="17.5" y="3" width="11.5" height="11.5" rx="2.2" fill="none" stroke-width="2.2"/>
+  <rect class="ink" x="3" y="17.5" width="11.5" height="11.5" rx="2.2" fill="none" stroke-width="2.2"/>
+  <path class="wipe" d="M17.5 27.2h9.3a2.2 2.2 0 0 0 2.2-2.2v-9.3" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
