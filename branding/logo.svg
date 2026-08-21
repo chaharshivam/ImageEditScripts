@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 36" role="img" aria-label="Framewipe">
+  <title>Framewipe</title>
+  <style>
+    .ink { stroke: #121410; fill: #121410; }
+    .wipe { stroke: #c4f542; }
+    .word { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.04em; }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #f4f1ea; fill: #f4f1ea; }
+    }
+  </style>
+  <g transform="translate(0,2)">
+    <rect class="ink" x="2" y="2" width="12" height="12" rx="2.1" fill="none" stroke-width="2.1"/>
+    <rect class="ink" x="17" y="2" width="12" height="12" rx="2.1" fill="none" stroke-width="2.1"/>
+    <rect class="ink" x="2" y="17" width="12" height="12" rx="2.1" fill="none" stroke-width="2.1"/>
+    <path class="wipe" d="M17 27.5h9.5a2.1 2.1 0 0 0 2.1-2.1V17" fill="none" stroke-width="2.1" stroke-linecap="round"/>
+  </g>
+  <text class="ink word" x="42" y="25">Framewipe</text>
+</svg>

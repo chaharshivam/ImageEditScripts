@@ -3,188 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cleanroom — prep AI media for Instagram</title>
-<style>
-  :root{
-    --bg:#f7f8fa; --panel:#fff; --ink:#15181e; --muted:#697180; --faint:#98a1b0;
-    --line:#e4e7ec; --line2:#eef0f4;
-    --accent:#2f6bed; --accent-ink:#fff; --accent-soft:#eaf0fe;
-    --ok:#127a45; --oksoft:#e6f5ec; --warn:#9a5b06; --warnsoft:#fdf2e0;
-    --bad:#b3261e; --badsoft:#fceceb; --code:#f3f4f7;
-  }
-  @media (prefers-color-scheme:dark){
-    :root{
-      --bg:#0e1014; --panel:#161a21; --ink:#e7eaef; --muted:#98a1b0; --faint:#6d7684;
-      --line:#252b35; --line2:#1d222a;
-      --accent:#6f9cff; --accent-ink:#0e1014; --accent-soft:#1a2437;
-      --ok:#5fc98a; --oksoft:#12291d; --warn:#e2a44f; --warnsoft:#2a2013;
-      --bad:#f07a72; --badsoft:#2c1614; --code:#11151b;
-    }
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0}
-  body{background:var(--bg);color:var(--ink);
-       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-       -webkit-font-smoothing:antialiased}
-  .wrap{max-width:1000px;margin:0 auto;padding:26px 20px 90px}
-  a{color:var(--accent)}
-
-  header{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
-  .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);
-        display:grid;place-items:center;color:var(--accent-ink);font-weight:800;
-        font-size:15px;letter-spacing:-.5px;flex:none}
-  h1{font-size:20px;margin:0;letter-spacing:-.3px}
-  .tag{color:var(--muted);font-size:13.5px}
-  .caps{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);
-        margin:10px 0 20px}
-  .cap{display:flex;align-items:center;gap:5px}
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
-  .dot.off{background:var(--faint)}
-
-  .step{display:flex;align-items:center;gap:9px;margin:26px 0 12px}
-  .num{width:23px;height:23px;border-radius:50%;background:var(--line);
-       color:var(--muted);display:grid;place-items:center;font-size:12px;
-       font-weight:700;flex:none}
-  .step.on .num{background:var(--accent);color:var(--accent-ink)}
-  .step h2{font-size:15px;margin:0;font-weight:650;letter-spacing:-.1px}
-  .step .why{color:var(--muted);font-size:13px;font-weight:400}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px}
-  .drop{border:2px dashed var(--line);border-radius:13px;padding:34px 20px;
-        text-align:center;cursor:pointer;transition:.14s;background:var(--panel)}
-  .drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
-  .drop b{display:block;font-size:15.5px;margin-bottom:3px}
-  .drop span{color:var(--muted);font-size:13px}
-  input[type=file]{display:none}
-
-  .files{display:flex;flex-direction:column;gap:10px}
-  .file{border:1px solid var(--line);border-radius:11px;background:var(--panel);
-        overflow:hidden}
-  .fhead{display:flex;justify-content:space-between;gap:12px;align-items:center;
-         padding:12px 14px;cursor:pointer}
-  .fhead:hover{background:var(--line2)}
-  .fleft{display:flex;align-items:center;gap:10px;min-width:0}
-  .ficon{width:26px;height:26px;border-radius:6px;background:var(--line2);
-         display:grid;place-items:center;font-size:12px;flex:none;color:var(--muted)}
-  .fname{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fmeta{color:var(--muted);font-size:12.5px;margin-top:1px}
-  .fright{display:flex;align-items:center;gap:9px;flex:none}
-  .chev{color:var(--faint);font-size:11px;transition:.15s}
-  .file.open .chev{transform:rotate(90deg)}
-  .fbody{display:none;padding:0 14px 14px;border-top:1px solid var(--line2)}
-  .file.open .fbody{display:block}
-
-  .pill{display:inline-block;padding:2.5px 9px;border-radius:999px;font-size:11.5px;
-        font-weight:650;white-space:nowrap}
-  .pill.ok{background:var(--oksoft);color:var(--ok)}
-  .pill.warn{background:var(--warnsoft);color:var(--warn)}
-  .pill.bad{background:var(--badsoft);color:var(--bad)}
-
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
-  th{color:var(--faint);font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-  td.detail{color:var(--muted);word-break:break-word}
-  td.size{white-space:nowrap;color:var(--faint);text-align:right}
-
-  .msg{border-radius:9px;padding:11px 13px;font-size:13.2px;margin-top:12px;
-       border-left:3px solid}
-  .msg.info{background:var(--accent-soft);border-color:var(--accent)}
-  .msg.warn{background:var(--warnsoft);border-color:var(--warn);color:var(--warn)}
-  .msg.bad{background:var(--badsoft);border-color:var(--bad);color:var(--bad)}
-  .msg.ok{background:var(--oksoft);border-color:var(--ok);color:var(--ok)}
-  .msg b{font-weight:700}
-
-  .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}
-  .act{border:1px solid var(--line);border-radius:11px;padding:13px;cursor:pointer;
-       background:var(--panel);transition:.13s;position:relative}
-  .act:hover:not(.dis){border-color:var(--accent)}
-  .act.on{border-color:var(--accent);background:var(--accent-soft);
-          box-shadow:0 0 0 1px var(--accent) inset}
-  .act.dis{opacity:.45;cursor:not-allowed}
-  .act b{display:block;font-size:14px;margin-bottom:3px}
-  .act span{color:var(--muted);font-size:12.5px;line-height:1.45;display:block}
-  .act .rec{position:absolute;top:-8px;right:10px;background:var(--ok);color:#fff;
-            font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;
-            letter-spacing:.03em}
-  @media (prefers-color-scheme:dark){.act .rec{color:#0e1014}}
-
-  .opts{margin-top:14px;padding-top:14px;border-top:1px solid var(--line2)}
-  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  label.f{font-size:13px;color:var(--muted);display:flex;gap:7px;align-items:center}
-  select,input[type=text]{padding:7px 10px;border:1px solid var(--line);border-radius:8px;
-    background:var(--panel);color:var(--ink);font:inherit;font-size:13.5px}
-  input[type=text]{font-variant-numeric:tabular-nums}
-  button{padding:10px 20px;border:0;border-radius:9px;background:var(--accent);
-         color:var(--accent-ink);font:inherit;font-weight:650;cursor:pointer}
-  button:disabled{opacity:.45;cursor:default}
-  button.sec{background:transparent;color:var(--accent);border:1px solid var(--line)}
-  button.sm{padding:5px 11px;font-size:12.5px;font-weight:600}
-  .hint{font-size:12.5px;color:var(--muted);margin-top:9px}
-
-  .bar{height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:12px}
-  .bar i{display:block;height:100%;background:var(--accent);width:30%;
-         animation:slide 1.4s ease-in-out infinite}
-  @keyframes slide{0%{margin-left:-30%}100%{margin-left:100%}}
-  pre{background:var(--code);border:1px solid var(--line);border-radius:9px;
-      padding:12px;overflow:auto;font-size:12.3px;line-height:1.5;max-height:340px;
-      white-space:pre-wrap;word-break:break-word;margin:12px 0 0}
-  details summary{cursor:pointer;font-size:13px;color:var(--muted);margin-top:12px}
-
-  .cands{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-  .cand{display:flex;justify-content:space-between;align-items:center;gap:12px;
-        border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13.2px}
-  .cand code{font-size:12.5px;background:var(--code);padding:2px 6px;border-radius:5px}
-  .preview{margin-top:12px}
-  .preview img{max-width:100%;border-radius:9px;border:1px solid var(--line)}
-  .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-  .thumb{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
-  .thumb img{display:block;max-width:150px;max-height:190px}
-  .thumb div{font-size:11px;color:var(--muted);padding:5px 7px;border-top:1px solid var(--line2);
-             max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .verdict{border-radius:10px;padding:13px 15px;margin-bottom:12px;border:1px solid}
-  .verdict h4{margin:0 0 3px;font-size:14.5px;display:flex;align-items:center;gap:8px}
-  .verdict p{margin:0;font-size:12.8px;line-height:1.5;opacity:.92}
-  .verdict.ai{background:var(--warnsoft);border-color:var(--warn);color:var(--warn)}
-  .verdict.maybe{background:var(--warnsoft);border-color:var(--warn);color:var(--warn)}
-  .verdict.cam{background:var(--oksoft);border-color:var(--ok);color:var(--ok)}
-  .verdict.none{background:var(--code);border-color:var(--line);color:var(--muted)}
-  .vicon{font-size:16px;line-height:1}
-  .ev{margin-top:10px;display:flex;flex-direction:column;gap:5px}
-  .evrow{display:flex;gap:9px;align-items:flex-start;font-size:12.4px}
-  .evtag{flex:none;font-size:10px;font-weight:750;letter-spacing:.04em;padding:2px 7px;
-         border-radius:999px;margin-top:1px;text-transform:uppercase}
-  .evtag.declared{background:var(--warn);color:#fff}
-  .evtag.camera{background:var(--ok);color:#fff}
-  .evtag.circumstantial{background:var(--line);color:var(--muted)}
-  @media (prefers-color-scheme:dark){.evtag.declared,.evtag.camera{color:#0e1014}}
-  .synth{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding-top:11px;
-         border-top:1px solid var(--line2);font-size:12.6px}
-  .synth b{white-space:nowrap}
-  .hidden{display:none!important}
-  .spread{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-</style>
+<title>Framewipe — prep frames locally. Nothing uploaded.</title>
+<meta name="description" content="Local Mac app to strip metadata, split 2x2 grids, and clean videos for Instagram. Nothing is uploaded.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="stylesheet" href="/branding/app.css">
 </head>
 <body>
 <div class="wrap">
-
   <header>
-    <div class="logo">C</div>
-    <h1>Cleanroom</h1>
-    <span class="tag">prep AI-generated media for Instagram</span>
+    <img class="mark" src="/branding/mark.svg" width="32" height="32" alt="">
+    <div>
+      <h1>Framewipe</h1>
+      <p class="tag">Prep frames locally. Nothing uploaded.</p>
+    </div>
   </header>
-  <div class="caps" id="caps"></div>
+  <p class="intro">A local tool on this Mac. Strip metadata, split 2x2 grids into Instagram-ready 4:5 and 9:16 frames, and clean videos. Files never leave the machine.</p>
+  <div class="caps" id="caps" role="status"></div>
 
-  <!-- STEP 1 -->
   <div class="step on"><div class="num">1</div><h2>Add your files</h2></div>
-  <div class="drop" id="drop">
+  <div class="drop" id="drop" role="button" tabindex="0"
+       aria-label="Drop images or videos here, or press Enter to browse">
     <b>Drop images or videos here</b>
-    <span>or click to browse &nbsp;·&nbsp; PNG, JPG, WebP, MP4, MOV, WebM</span>
+    <span>or click / press Enter to browse &nbsp;·&nbsp; PNG, JPG, WebP, MP4, MOV, WebM</span>
     <input type="file" id="picker" multiple
            accept=".png,.jpg,.jpeg,.webp,.mp4,.mov,.m4v,.webm">
   </div>
-  <div id="upmsg"></div>
+  <div id="upmsg" role="status"></div>
 
-  <!-- STEP 2 -->
   <div id="step2" class="hidden">
     <div class="step on"><div class="num">2</div><h2>What's inside</h2>
       <span class="why" id="sum2"></span></div>
@@ -192,69 +39,75 @@
     <div id="advice"></div>
   </div>
 
-  <!-- STEP 3 -->
   <div id="step3" class="hidden">
     <div class="step on"><div class="num">3</div><h2>Choose what to do</h2></div>
     <div class="card">
-      <div class="acts" id="acts"></div>
-
+      <div class="acts" id="acts" role="radiogroup" aria-label="Actions"></div>
       <div class="opts hidden" id="opts">
         <div id="opt-clean">
           <div class="hint"><b>Nothing but metadata changes.</b> No splitting, cropping,
             resizing or re-encoding. JPEG, PNG and WebP are rewritten losslessly, so
             the pixels come out bit-identical to what you put in.</div>
         </div>
-
         <div id="opt-split" class="hidden">
           <div class="row">
-            <label class="f">Ratio
+            <label class="f" for="fmt">Ratio
               <select id="fmt">
                 <option value="both">Both 4:5 and 9:16</option>
                 <option value="45">4:5 — feed post</option>
                 <option value="916">9:16 — reel / story</option>
               </select>
             </label>
-            <label class="f">Output folders
+            <label class="f" for="layout">Output folders
               <select id="layout">
                 <option value="grid">One folder per image</option>
                 <option value="flat">All in one folder</option>
+                <option value="mirror">Mirror input folders</option>
               </select>
             </label>
           </div>
           <div class="hint">Finds the gutters by looking at the pixels rather than
             assuming exact quarters, then crops and upscales each panel to exact
-            Instagram dimensions.</div>
+            Instagram dimensions. Use <b>mirror</b> when the same filename appears
+            in more than one input folder.</div>
         </div>
-
         <div id="opt-video" class="hidden">
           <div class="row">
-            <label class="f">Framing
+            <label class="f" for="fit">Framing
               <select id="fit">
                 <option value="none">Keep original shape (no crop)</option>
                 <option value="pad">Letterbox to 4:5 / 9:16</option>
                 <option value="crop">Centre-crop to 4:5 / 9:16</option>
               </select>
             </label>
-            <label class="f">Manual crop
-              <input type="text" id="crop" placeholder="x:y:w:h — optional" size="17">
+            <label class="f" for="crop">Manual crop
+              <input type="text" id="crop" placeholder="x:y:w:h — optional" size="17" autocomplete="off">
             </label>
           </div>
           <div class="hint">Strips all container metadata and re-encodes to Instagram
             dimensions. The default crops nothing away.</div>
         </div>
-
         <div id="opt-detect" class="hidden">
           <div class="hint">Looks for something small, bright and motionless in each
             corner. It <b>cannot tell a watermark from a poster, caption or ceiling
             light</b> — you pick the right one from the results.</div>
         </div>
-
+        <div id="opt-cropwm" class="hidden">
+          <div class="row">
+            <label class="f" for="cropbox">Watermark box
+              <input type="text" id="cropbox" placeholder="x:y:w:h" size="15" autocomplete="off">
+            </label>
+          </div>
+          <div class="hint">Safer than painting. Uses the engine <code>--suggest-crop</code>
+            to find the largest 4:5 and 9:16 crops that leave the mark out of frame.
+            Run <b>Find watermark</b> first if you do not have a box.</div>
+        </div>
         <div id="opt-removelogo" class="hidden">
           <div class="row">
-            <label class="f">Watermark box
-              <input type="text" id="box" placeholder="x:y:w:h" size="15">
+            <label class="f" for="box">Watermark box
+              <input type="text" id="box" placeholder="x:y:w:h" size="15" autocomplete="off">
             </label>
-            <label class="f">Method
+            <label class="f" for="method">Method
               <select id="method">
                 <option value="delogo">Fast — good over sky, blur, flat areas</option>
                 <option value="propainter">Best quality — takes a few minutes</option>
@@ -263,19 +116,18 @@
             </label>
           </div>
           <div class="msg warn" id="boxwarn">Run <b>Find watermark</b> first and pick a
-            box from its results. A wrong box will erase the wrong part of your video.</div>
+            box from its results. A wrong box will erase the wrong part of your video.
+            Prefer <b>Crop watermark out</b> when the mark sits in a corner.</div>
         </div>
-
         <div class="row" style="margin-top:16px">
-          <button id="run">Run</button>
-          <button id="reset" class="sec">Start over</button>
+          <button id="run" type="button">Run</button>
+          <button id="reset" class="sec" type="button">Start over</button>
           <span class="tag" id="runhint"></span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 4 -->
   <div id="step4" class="hidden">
     <div class="step on"><div class="num">4</div><h2>Results</h2>
       <span class="why" id="sum4"></span></div>
@@ -283,7 +135,10 @@
       <div id="progress" class="hidden">
         <div class="spread"><b id="plabel">Working…</b><span class="tag" id="ptime"></span></div>
         <div class="bar"><i></i></div>
-        <div class="hint" id="pnote"></div>
+        <div class="spread" style="margin-top:10px">
+          <div class="hint" id="pnote"></div>
+          <button id="cancel" class="danger sm" type="button">Cancel</button>
+        </div>
       </div>
       <div id="outcome"></div>
       <div id="candsWrap"></div>
@@ -292,315 +147,7 @@
         <pre id="log"></pre></details>
     </div>
   </div>
-
 </div>
-
-<script>
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-let JOB=null, REPORTS=[], ACTION=null, CAPS={}, TIMER=null, POLL=null;
-
-const ACTIONS=[
-  {id:'clean',   title:'Remove metadata only',  desc:'Strip EXIF, XMP, C2PA and the rest. Nothing else about the file changes.', needs:'any'},
-  {id:'split',   title:'Split 2×2 grid',        desc:'Cut a four-panel grid into separate Instagram-ready images.', needs:'image'},
-  {id:'video',   title:'Clean &amp; resize video', desc:'Strip metadata and re-encode to Instagram dimensions.', needs:'video'},
-  {id:'detect',  title:'Find watermark',        desc:'Locate a burned-in mark and show you where it is.', needs:'video'},
-  {id:'removelogo',title:'Remove watermark',    desc:'Paint out a mark once you know its position.', needs:'video'},
-];
-
-fetch('/api/capabilities').then(r=>r.json()).then(c=>{
-  CAPS=c;
-  $('#caps').innerHTML=[
-    cap('Images', true),
-    cap('Video (ffmpeg)', c.ffmpeg),
-    cap('Best watermark removal (ProPainter)', c.propainter),
-    cap('Sharper upscaling (Real-ESRGAN)', c.realesrgan),
-  ].join('');
-});
-const cap=(n,on)=>`<span class="cap"><span class="dot${on?'':' off'}"></span>${n}${on?'':' — not installed'}</span>`;
-
-/* ---------- step 1: upload ---------- */
-const drop=$('#drop'), picker=$('#picker');
-drop.onclick=()=>picker.click();
-drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
-drop.ondragleave=()=>drop.classList.remove('over');
-drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');upload(e.dataTransfer.files)};
-picker.onchange=e=>upload(e.target.files);
-
-function upload(list){
-  if(!list||!list.length) return;
-  const fd=new FormData(); let n=0;
-  for(const f of list){ fd.append('files',f); n++; }
-  $('#upmsg').innerHTML='<div class="msg info">Reading '+n+' file'+(n>1?'s':'')+'…</div>';
-  fetch('/api/inspect',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{
-    if(d.error){$('#upmsg').innerHTML='<div class="msg bad">'+esc(d.error)+'</div>';return}
-    $('#upmsg').innerHTML='';
-    JOB=d.job; REPORTS=d.reports;
-    renderFiles(); renderActions();
-    $('#step2').classList.remove('hidden');
-    $('#step3').classList.remove('hidden');
-    $('#step4').classList.add('hidden');
-  }).catch(e=>$('#upmsg').innerHTML='<div class="msg bad">Upload failed: '+esc(e)+'</div>');
-}
-
-/* ---------- step 2: report ---------- */
-function renderFiles(){
-  const imgs=REPORTS.filter(r=>r.kind==='image').length;
-  const vids=REPORTS.filter(r=>r.kind==='video').length;
-  const dirty=REPORTS.filter(r=>(r.findings||[]).length).length;
-  $('#sum2').textContent=[imgs?imgs+' image'+(imgs>1?'s':''):null,
-                          vids?vids+' video'+(vids>1?'s':''):null].filter(Boolean).join(', ');
-  $('#results').innerHTML=REPORTS.map((r,i)=>{
-    const n=(r.findings||[]).length;
-    const pill=r.error?'<span class="pill bad">unreadable</span>'
-      :n?'<span class="pill warn">'+n+' item'+(n>1?'s':'')+' found</span>'
-        :'<span class="pill ok">already clean</span>';
-    const opill=originPill(r);
-    const meta=[r.dimensions,r.codec,r.size_h,
-      r.duration?r.duration.toFixed(1)+'s':null,
-      r.audio?'audio: '+r.audio:null].filter(Boolean).join(' · ');
-    let body=originBlock(r);
-    if(r.error) body+='<div class="msg bad">'+esc(r.error)+'</div>';
-    else if(n){
-      body+='<table><tr><th>What was found</th><th>Contents</th><th>Size</th></tr>'+
-        r.findings.map(f=>'<tr><td>'+esc(f.label)+'</td><td class="detail">'+
-          esc(f.detail||'')+'</td><td class="size">'+(f.bytes?f.bytes+' B':'')+
-          '</td></tr>').join('')+'</table>';
-    } else body+='<div class="msg ok">No metadata of any kind. Nothing to remove.</div>';
-    return '<div class="file'+(n||r.error?' open':'')+'" data-i="'+i+'">'+
-      '<div class="fhead"><div class="fleft"><div class="ficon">'+
-        (r.kind==='video'?'▶':'▣')+'</div><div><div class="fname">'+esc(r.name)+
-        '</div><div class="fmeta">'+esc(meta)+'</div></div></div>'+
-      '<div class="fright">'+opill+pill+'<span class="chev">▶</span></div></div>'+
-      '<div class="fbody">'+body+'</div></div>';
-  }).join('');
-  $$('.fhead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
-
-  let adv='';
-  if(dirty) adv='<div class="msg info"><b>'+dirty+' file'+(dirty>1?'s carry':' carries')+
-    ' metadata.</b> If all you want is to remove it, choose <b>Remove metadata only</b> '+
-    'below — it is lossless and takes a moment.</div>';
-  else if(REPORTS.length) adv='<div class="msg ok"><b>Everything is already clean.</b> '+
-    'You can still split grids or resize video below.</div>';
-  $('#advice').innerHTML=adv;
-}
-
-const VERDICT={
-  'ai-declared':{cls:'ai',   icon:'\u25C6', pill:'warn', short:'AI-generated'},
-  'ai-likely':  {cls:'maybe',icon:'\u25C7', pill:'warn', short:'Possibly AI'},
-  'camera-like':{cls:'cam',  icon:'\u25CF', pill:'ok',   short:'Camera photo'},
-  'unknown':    {cls:'none', icon:'\u25CB', pill:'',     short:'Origin unknown'}
-};
-
-function originPill(r){
-  if(!r.origin) return '';
-  const v=VERDICT[r.origin.verdict]||VERDICT.unknown;
-  const cls=v.pill?('pill '+v.pill):'pill';
-  const st=v.pill?'':'background:var(--code);color:var(--muted)';
-  return '<span class="'+cls+'" style="'+st+'">'+v.short+'</span>';
-}
-
-function originBlock(r){
-  if(!r.origin) return '';
-  const o=r.origin, v=VERDICT[o.verdict]||VERDICT.unknown;
-  let h='<div class="verdict '+v.cls+'"><h4><span class="vicon">'+v.icon+'</span>'+
-        esc(o.headline)+'</h4><p>'+esc(o.explain)+'</p>';
-  if(o.evidence&&o.evidence.length){
-    h+='<div class="ev">'+o.evidence.map(e=>
-      '<div class="evrow"><span class="evtag '+e.weight+'">'+
-      (e.weight==='declared'?'proof':e.weight==='camera'?'camera':'weak')+
-      '</span><span><b>'+esc(e.label)+'</b>'+(e.detail?' — '+esc(e.detail):'')+
-      '</span></div>').join('')+'</div>';
-  }
-  h+='<div class="synth"><b>SynthID:</b><span>'+
-     (o.synthid==='declared'?'<b>declared in this file.</b> ':'not declared. ')+
-     esc(o.synthid_note)+'</span></div>';
-  return h+'</div>';
-}
-
-/* ---------- step 3: actions ---------- */
-function renderActions(){
-  const hasImg=REPORTS.some(r=>r.kind==='image'), hasVid=REPORTS.some(r=>r.kind==='video');
-  const dirty=REPORTS.some(r=>(r.findings||[]).length);
-  $('#acts').innerHTML=ACTIONS.map(a=>{
-    let dis=false, why='';
-    if(a.needs==='image'&&!hasImg){dis=true;why='No images loaded'}
-    if(a.needs==='video'&&!hasVid){dis=true;why='No videos loaded'}
-    if(a.needs==='video'&&hasVid&&!CAPS.ffmpeg){dis=true;why='Needs ffmpeg'}
-    const rec=(a.id==='clean'&&dirty)?'<span class="rec">SUGGESTED</span>':'';
-    return '<div class="act'+(dis?' dis':'')+'" data-a="'+a.id+'"'+(dis?' title="'+why+'"':'')+'>'+
-      rec+'<b>'+a.title+'</b><span>'+(dis?why:a.desc)+'</span></div>';
-  }).join('');
-  $$('.act').forEach(el=>el.onclick=()=>{
-    if(el.classList.contains('dis')) return;
-    ACTION=el.dataset.a;
-    $$('.act').forEach(x=>x.classList.remove('on')); el.classList.add('on');
-    $('#opts').classList.remove('hidden');
-    ['clean','split','video','detect','removelogo'].forEach(a=>
-      $('#opt-'+a).classList.toggle('hidden',a!==ACTION));
-    $('#run').textContent = ACTION==='detect' ? 'Find watermark' : 'Run';
-    updateHint();
-  });
-  ACTION=null; $('#opts').classList.add('hidden');
-}
-
-$('#method').onchange=updateHint;
-function updateHint(){
-  let h='';
-  if(ACTION==='removelogo'&&$('#method').value==='propainter')
-    h=CAPS.propainter?'ProPainter takes roughly 3–5 minutes for a 10-second clip.'
-                     :'ProPainter is not installed — this will fall back to the fast method.';
-  if(ACTION==='clean') h='Lossless — pixels stay bit-identical.';
-  $('#runhint').textContent=h;
-}
-
-$('#reset').onclick=()=>{
-  JOB=null;REPORTS=[];ACTION=null;
-  ['#step2','#step3','#step4'].forEach(s=>$(s).classList.add('hidden'));
-  $('#upmsg').innerHTML=''; picker.value='';
-  window.scrollTo({top:0,behavior:'smooth'});
-};
-
-/* ---------- run ---------- */
-$('#run').onclick=()=>{
-  if(!JOB){alert('Add some files first.');return}
-  if(!ACTION){alert('Choose what to do first.');return}
-  if(ACTION==='detect'){ runDetect(); return; }
-  if(ACTION==='removelogo'&&!$('#box').value.trim()){
-    $('#boxwarn').className='msg bad';
-    $('#boxwarn').innerHTML='<b>Enter the watermark box first.</b> Use <b>Find watermark</b> '+
-      'to get it — a wrong box erases the wrong part of your video.';
-    return;
-  }
-  const fd=new FormData(); fd.append('job',JOB); fd.append('action',ACTION);
-  if(ACTION==='split'){fd.append('format',$('#fmt').value);fd.append('layout',$('#layout').value)}
-  if(ACTION==='video'){fd.append('fit',$('#fit').value);fd.append('crop',$('#crop').value.trim())}
-  if(ACTION==='removelogo'){fd.append('box',$('#box').value.trim());fd.append('method',$('#method').value)}
-  startRun(fd);
-};
-
-function startRun(fd){
-  $('#run').disabled=true;
-  $('#step4').classList.remove('hidden');
-  $('#outcome').innerHTML=''; $('#thumbs').innerHTML=''; $('#candsWrap').innerHTML='';
-  $('#log').textContent=''; $('#logwrap').classList.add('hidden');
-  $('#progress').classList.remove('hidden'); $('#sum4').textContent='';
-  $('#step4').scrollIntoView({behavior:'smooth',block:'start'});
-  fetch('/api/run',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{
-    if(d.error){finishError(d.error);return}
-    $('#plabel').textContent=d.label+'…';
-    $('#pnote').textContent = ACTION==='removelogo'&&$('#method').value==='propainter'
-      ? 'Rebuilding every frame with ProPainter. This is the slow one — a few minutes is normal.'
-      : 'You can leave this page open; it updates as it goes.';
-    poll(d.run,0);
-  }).catch(e=>finishError(String(e)));
-}
-
-function poll(run,since){
-  clearTimeout(POLL);
-  fetch('/api/status/'+run+'?since='+since).then(r=>r.json()).then(d=>{
-    if(d.error){finishError(d.error);return}
-    if(d.lines&&d.lines.length){
-      $('#log').textContent+=(($('#log').textContent?'\n':'')+d.lines.join('\n'));
-      $('#logwrap').classList.remove('hidden');
-    }
-    $('#ptime').textContent=d.elapsed+'s'+(d.total?'  ·  file '+Math.min(d.done_count+1,d.total)+' of '+d.total:'');
-    if(d.current) $('#plabel').textContent=d.label+' — '+d.current;
-    if(d.status==='running'){ POLL=setTimeout(()=>poll(run,d.next),700); return; }
-    $('#progress').classList.add('hidden'); $('#run').disabled=false;
-    if(d.status==='error'){finishError(d.error||'Something went wrong.');return}
-    finishOk(d.result);
-  }).catch(e=>{POLL=setTimeout(()=>poll(run,since),1500)});
-}
-
-function finishOk(res){
-  const n=(res.files||[]).length;
-  const fails=(res.failures||[]).length;
-  let html='';
-  if(n){
-    html+='<div class="msg ok"><b>Done — '+n+' file'+(n>1?'s':'')+' ready.</b> '+
-      'Finished in '+res.elapsed+'s.</div>';
-  }else{
-    html+='<div class="msg warn"><b>No files were produced.</b> Check the log below.</div>';
-  }
-  if(fails) html+='<div class="msg bad"><b>'+fails+' file'+(fails>1?'s':'')+' failed:</b> '+
-    res.failures.map(f=>esc(f[0])+' — '+esc(f[1])).join('; ')+'</div>';
-  if((res.synthid||[]).length) html+='<div class="msg warn"><b>SynthID was not removed.</b> '+
-    'Metadata is gone and verified, but SynthID is embedded in the pixels and survives '+
-    're-encoding, cropping and watermark removal.</div>';
-  if(n) html+='<div class="row" style="margin-top:14px"><button id="dl">Download '+
-    (n>1?'all ('+n+' files)':'result')+'</button></div>';
-  $('#outcome').innerHTML=html;
-  $('#sum4').textContent=n?n+' file'+(n>1?'s':''):'';
-  if(n){ $('#dl').onclick=()=>location.href='/api/download/'+JOB; }
-  (res.files||[]).slice(0,12).forEach(f=>{
-    if(/\.(png|jpe?g|webp)$/i.test(f.name)){
-      const d=document.createElement('div'); d.className='thumb';
-      d.innerHTML='<img src="/api/file/'+JOB+'/'+encodeURIComponent(f.name)+'" alt="">'+
-                  '<div title="'+esc(f.name)+'">'+esc(f.name)+' · '+esc(f.size_h)+'</div>';
-      $('#thumbs').appendChild(d);
-    }
-  });
-}
-
-function finishError(m){
-  $('#progress').classList.add('hidden'); $('#run').disabled=false;
-  $('#outcome').innerHTML='<div class="msg bad"><b>That didn\'t work.</b> '+esc(m)+'</div>';
-}
-
-/* ---------- watermark detection ---------- */
-function runDetect(){
-  $('#run').disabled=true;
-  $('#step4').classList.remove('hidden');
-  $('#outcome').innerHTML=''; $('#thumbs').innerHTML=''; $('#candsWrap').innerHTML='';
-  $('#progress').classList.remove('hidden');
-  $('#plabel').textContent='Looking for a watermark…';
-  $('#pnote').textContent='Sampling frames and comparing them.';
-  $('#ptime').textContent='';
-  $('#step4').scrollIntoView({behavior:'smooth',block:'start'});
-  const fd=new FormData(); fd.append('job',JOB);
-  fetch('/api/detect',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{
-    $('#progress').classList.add('hidden'); $('#run').disabled=false;
-    if(d.error){finishError(d.error);return}
-    let html='';
-    for(const r of d.results){
-      html+='<div class="card" style="margin-top:12px"><b>'+esc(r.name)+'</b>';
-      if(!r.candidates.length){
-        html+='<div class="msg warn">Nothing that looks like a watermark was found. '+
-          'If you can see one, read its position off a frame and type the box in manually.</div>';
-      }else{
-        html+='<div class="msg info">These are <b>guesses</b>. Look at the picture below '+
-          'and pick the box that is actually the watermark — the top result is often a '+
-          'poster or caption, not the mark.</div><div class="cands">';
-        r.candidates.forEach((c,i)=>{
-          html+='<div class="cand"><span><b>'+(i+1)+'.</b> '+esc(c.corner)+
-            ' &nbsp;<code>'+esc(c.box)+'</code> &nbsp;<span class="tag">'+c.w+'×'+c.h+' px</span></span>'+
-            '<button class="sm use" data-box="'+esc(c.box)+'">Use this one</button></div>';
-        });
-        html+='</div>';
-      }
-      if(r.preview) html+='<div class="preview"><img src="/api/file/'+JOB+'/'+
-        encodeURIComponent(r.preview)+'" alt="detected boxes"></div>';
-      html+='</div>';
-    }
-    $('#candsWrap').innerHTML=html;
-    $$('.use').forEach(b=>b.onclick=()=>{
-      $('#box').value=b.dataset.box;
-      $$('.act').forEach(x=>x.classList.remove('on'));
-      const el=document.querySelector('.act[data-a="removelogo"]');
-      el.classList.add('on'); ACTION='removelogo';
-      ['clean','split','video','detect','removelogo'].forEach(a=>
-        $('#opt-'+a).classList.toggle('hidden',a!=='removelogo'));
-      $('#opts').classList.remove('hidden');
-      $('#boxwarn').className='msg ok';
-      $('#boxwarn').innerHTML='Using box <b>'+esc(b.dataset.box)+'</b>. Pick a method and press Run.';
-      $('#run').textContent='Run'; updateHint();
-      $('#step3').scrollIntoView({behavior:'smooth',block:'start'});
-    });
-  }).catch(e=>finishError(String(e)));
-}
-
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,
-  c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-</script>
+<script src="/branding/app.js"></script>
 </body>
 </html>
