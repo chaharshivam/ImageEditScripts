@@ -22,6 +22,7 @@ import string
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -49,6 +50,70 @@ FORMAT_LABEL = {"45": "4:5", "916": "9:16"}
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm"}
+
+# Cooperative cancel for the local web UI. CLI never sets this.
+_cancel_event = None  # type: Optional[threading.Event]
+_active_procs = []    # type: List[subprocess.Popen]
+
+
+class Cancelled(Exception):
+    """Raised when the web UI asks a run to stop."""
+
+
+def set_cancel_event(event):
+    # type: (Optional[threading.Event]) -> None
+    global _cancel_event
+    _cancel_event = event
+
+
+def is_cancelled():
+    return bool(_cancel_event is not None and _cancel_event.is_set())
+
+
+def kill_active_subprocesses():
+    """Best-effort: kill ffmpeg / ProPainter children started via run_cmd."""
+    for proc in list(_active_procs):
+        try:
+            proc.kill()
+        except Exception:
+            pass
+
+
+def check_cancel():
+    if is_cancelled():
+        raise Cancelled("cancelled")
+
+
+def run_cmd(cmd, timeout=3600, cwd=None, check=False):
+    """subprocess.run stand-in that can be killed from the web UI."""
+    check_cancel()
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+    _active_procs.append(proc)
+    try:
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            raise
+        check_cancel()
+
+        class _R(object):
+            pass
+        r = _R()
+        r.returncode = proc.returncode
+        r.stdout = stdout
+        r.stderr = stderr
+        if check and r.returncode != 0:
+            raise subprocess.CalledProcessError(r.returncode, cmd, stdout, stderr)
+        return r
+    finally:
+        try:
+            _active_procs.remove(proc)
+        except ValueError:
+            pass
+
 
 # Panels in reading order: top-left, top-right, bottom-left, bottom-right.
 PANEL_NAMES = ["p1_tl", "p2_tr", "p3_bl", "p4_br"]
@@ -1493,11 +1558,11 @@ def propainter_inpaint(src: Path, box: Tuple[int, int, int, int], src_w: int,
     frames_dir = tmp / "frames"
     frames_dir.mkdir()
     try:
-        subprocess.run(
+        run_cmd(
             ["ffmpeg", "-hide_banner", "-v", "error", "-y", "-i", str(src),
              "-vf", "crop=%d:%d:%d:%d" % (rw, rh, rx0, ry0),
              "-start_number", "0", str(frames_dir / "%05d.png")],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1800)
+            check=True, timeout=1800)
 
         mask = Image.new("L", (rw, rh), 0)
         ImageDraw.Draw(mask).rectangle(
@@ -1509,12 +1574,11 @@ def propainter_inpaint(src: Path, box: Tuple[int, int, int, int], src_w: int,
         log.step("ProPainter: %d frames, %dx%d region around the mark — "
                  "this takes a few minutes" % (n_in, rw, rh), indent)
 
-        proc = subprocess.run(
+        proc = run_cmd(
             [str(py), "inference_propainter.py", "-i", str(frames_dir),
              "-m", str(mask_path), "-o", str(tmp / "out"),
              "--subvideo_length", "40", "--save_frames"],
-            cwd=str(repo), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            timeout=7200)
+            cwd=str(repo), timeout=7200)
         out_frames = tmp / "out" / "frames" / "frames"
         if proc.returncode != 0 or not out_frames.is_dir():
             tail = proc.stderr.decode("utf-8", "replace").strip().splitlines()
@@ -1529,12 +1593,12 @@ def propainter_inpaint(src: Path, box: Tuple[int, int, int, int], src_w: int,
 
         # Composite the region back over the untouched original, losslessly.
         dst = tmp / "inpainted.mkv"
-        subprocess.run(
+        run_cmd(
             ["ffmpeg", "-hide_banner", "-v", "error", "-y", "-i", str(src),
              "-framerate", "%.6f" % (fps or 30.0), "-i", str(out_frames / "%04d.png"),
              "-filter_complex", "[0:v][1:v]overlay=%d:%d" % (rx0, ry0),
              "-an", "-c:v", "ffv1", str(dst)],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3600)
+            check=True, timeout=3600)
         log.step("ProPainter: %d frames rebuilt, region composited back" % n_out,
                  indent)
         return dst
@@ -1628,6 +1692,7 @@ def build_ffmpeg_command(src: Path, dst: Path, chain: Sequence[str],
 
 def process_video(path: Path, input_root: Path, output_root: Path, args,
                   log: Log, stats: Stats, index: int, total: int) -> None:
+    check_cancel()
     prefix = log.bold("[%d/%d]" % (index, total))
     log.info("")
     log.info("%s %s %s" % (prefix, log.bold(str(path.relative_to(input_root))),
@@ -1745,6 +1810,7 @@ def process_video(path: Path, input_root: Path, output_root: Path, args,
             else:
                 removed = False
                 if args.logo_method == "propainter" and not args.dry_run:
+                    check_cancel()
                     res = propainter_inpaint(path, box, src_w, src_h, fps, log, 6,
                                              Path.cwd())
                     if res:
@@ -1823,8 +1889,7 @@ def process_video(path: Path, input_root: Path, output_root: Path, args,
             stats.panels += 1
             continue
 
-        proc = subprocess.run(cmd, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE, timeout=3600)
+        proc = run_cmd(cmd, timeout=3600)
         if proc.returncode != 0 or not out_path.exists():
             err = proc.stderr.decode("utf-8", "replace").strip().splitlines()
             raise RuntimeError("ffmpeg failed: %s" % (err[-1] if err else "unknown"))
@@ -1991,6 +2056,7 @@ def process_image_clean_only(path: Path, input_root: Path, output_root: Path,
                              args, log: Log, stats: Stats, index: int,
                              total: int) -> None:
     """Report and strip metadata. The picture itself is left exactly alone."""
+    check_cancel()
     prefix = log.bold("[%d/%d]" % (index, total))
     log.info("")
     log.info("%s %s %s" % (prefix, log.bold(str(path.relative_to(input_root))),
@@ -2050,6 +2116,7 @@ def process_image_clean_only(path: Path, input_root: Path, output_root: Path,
 
 def process_grid(path: Path, input_root: Path, output_root: Path, args,
                  up: Upscaler, log: Log, stats: Stats, index: int, total: int) -> None:
+    check_cancel()
     prefix = log.bold("[%d/%d]" % (index, total))
     log.info("")
     log.info("%s %s" % (prefix, log.bold(str(path.relative_to(input_root)))))
@@ -2202,7 +2269,7 @@ def have_ffmpeg() -> bool:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="split_grids.py",
-        description="Split 2x2 grid images into Instagram-ready 4:5 / 9:16 panels.",
+        description="Prep images and videos for Instagram: lossless metadata strip, 2x2 grid split to 4:5 / 9:16, video clean/scale, watermark detect and inpaint.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""examples:
   # images: split 2x2 grids into Instagram panels
@@ -2224,8 +2291,8 @@ def build_parser() -> argparse.ArgumentParser:
   python split_grids.py ./clips ./out --video-crop 45:0:630:1120
 """,
     )
-    p.add_argument("input", type=Path, help="folder of grid images (searched recursively)")
-    p.add_argument("output", type=Path, help="folder to write panels into")
+    p.add_argument("input", type=Path, help="folder of images and/or videos (searched recursively)")
+    p.add_argument("output", type=Path, help="folder to write results into")
     p.add_argument("--format", choices=["45", "916", "both"], default=None,
                    help="force output ratio; overrides filename and folder routing")
     p.add_argument("--layout", choices=["grid", "flat", "mirror"], default="grid",
@@ -2338,11 +2405,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     files, skipped = collect_inputs(input_root)
     stats = Stats(skipped=skipped)
 
-    log.header("split_grids — 2x2 grid -> Instagram panels")
+    log.header("split_grids — images + video -> Instagram-ready frames")
     log.info("input : %s" % input_root)
     log.info("output: %s%s" % (output_root, "  (DRY RUN — nothing written)"
                                if args.dry_run else ""))
-    log.info("found : %d image(s), %d non-image file(s) skipped"
+    log.info("found : %d file(s), %d unsupported file(s) skipped"
              % (len(files), len(skipped)))
 
     up = detect_upscaler(log, args.realesrgan_bin, args.no_realesrgan,
@@ -2357,7 +2424,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                  "unsharp mask" % up.detail)
 
     if not files:
-        log.warn("no supported images found (%s)" % ", ".join(sorted(IMAGE_EXTS)))
+        log.warn("no supported files found (%s)" % ", ".join(sorted(IMAGE_EXTS | VIDEO_EXTS)))
 
     videos = [f for f in files if f.suffix.lower() in VIDEO_EXTS]
     ffmpeg_ok = have_ffmpeg()
