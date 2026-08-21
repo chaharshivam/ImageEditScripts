@@ -1,9 +1,11 @@
-# Core (images)
-Pillow>=9.1
-numpy>=1.21
+# Core (images). Pins are floors plus a ceiling so a future major bump cannot
+# silently break Python 3.9.
+Pillow>=9.1,<12
+numpy>=1.21,<3
 
-# Web app (webapp.py / Cleanroom.command)
-Flask>=2.2
+# Web app (webapp.py / Framewipe.command)
+Flask>=2.2,<4
 
 # Video features additionally need ffmpeg on PATH:  brew install ffmpeg
-# Optional watermark removal via ProPainter: see README (separate venv)
+# Optional extras (not installed by default): see requirements-optional.txt
+# Dev extras (pytest): see requirements-dev.txt

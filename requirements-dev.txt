@@ -1,0 +1,3 @@
+# Dev-only. End users running Framewipe.command do not need this.
+-r requirements.txt
+pytest>=7.0,<9

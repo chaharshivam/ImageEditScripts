@@ -1,0 +1,4 @@
+# Optional. Framewipe's engine does not import these unless you add them.
+# Watermark detection already runs on numpy; OpenCV is unused by default.
+
+# opencv-python>=4.5,<5

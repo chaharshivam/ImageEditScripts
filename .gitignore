@@ -9,10 +9,14 @@ venv/
 # Python cache
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
 
-# IDE
+# IDE / local tool settings
 .idea/
 .vscode/
+.claude/
 
 # Local AI/tool runtime data
 .propainter/
@@ -20,6 +24,7 @@ __pycache__/
 # Environment/secrets
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 
